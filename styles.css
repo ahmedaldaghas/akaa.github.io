@@ -1,0 +1,54 @@
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Center align the container */
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+form {
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.dimension-input {
+  width: 100px;
+  margin-right: 10px;
+}
+
+#result {
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  display: none;
+  text-align: center; /* Center align the result */
+}
+
+#cost {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.dollar-sign {
+  color: #0066cc; /* Change the color of the dollar sign */
+}
+
