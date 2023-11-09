@@ -2,25 +2,22 @@ document.addEventListener("DOMContentLoaded", function () {
   const resultDiv = document.getElementById("result");
   const cbmTotalText = document.getElementById("cbm-total");
   const costTotalText = document.getElementById("cost-total");
-  const priceInput = document.getElementById("price");
   const productEntries = document.getElementById("product-entries");
   const addProductButton = document.getElementById("add-product");
 
-  addProductButton.addEventListener("click", () => {
-    createProductEntry();
-  });
+  let defaultPrice = null; // Initialize the default price
 
-  priceInput.addEventListener("input", () => {
-    calculateCost();
+  addProductButton.addEventListener("click", () => {
+    createProductEntry(defaultPrice);
   });
 
   document.addEventListener("keydown", function (event) {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
-      createProductEntry();
+      createProductEntry(defaultPrice);
     }
   });
 
-  function createProductEntry() {
+  function createProductEntry(price) {
     const productEntry = document.createElement("div");
     productEntry.className = "product-entry";
 
@@ -29,6 +26,9 @@ document.addEventListener("DOMContentLoaded", function () {
     productEntry.innerHTML = `
       <h3>Product ${productNumber}</h3>
       <button type="button" class="remove-product">Remove Product</button>
+      <label for="price">Price per CBM (<span class="BHD">BHD</span>):</label>
+      <input type="number" class="price-input" value="${price || ''}" step="0.01" required onclick="this.select()">
+      <br>
       <label for="dimension">Dimension (LxWxH):</label>
       <input type="number" class="dimension-input" step="0.01" required onclick="this.select()">
       <input type="number" class="dimension-input" step="0.01" required onclick="this.select()">
@@ -55,6 +55,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (previousProductEntry) {
       const previousUnit = previousProductEntry.querySelector(".dimension-unit").value;
       productEntry.querySelector(".dimension-unit").value = previousUnit;
+
+      // Set the default price for the next product
+      defaultPrice = parseFloat(previousProductEntry.querySelector(".price-input").value);
+      productEntry.querySelector(".price-input").value = defaultPrice;
     }
 
     productEntry.querySelector(".remove-product").addEventListener("click", () => {
@@ -80,12 +84,12 @@ document.addEventListener("DOMContentLoaded", function () {
     const productList = productEntries.querySelectorAll(".product-entry");
     let totalCBM = 0;
     let totalCost = 0;
-    const price = parseFloat(priceInput.value);
 
     productList.forEach((productEntry) => {
       const dimensionInputs = productEntry.querySelectorAll(".dimension-input");
       const dimensionUnitSelect = productEntry.querySelector(".dimension-unit");
       const quantityInput = productEntry.querySelector(".quantity-input");
+      const priceInput = productEntry.querySelector(".price-input");
       const cbmProduct = productEntry.querySelector(".cbm-product");
       const costProduct = productEntry.querySelector(".cost-product");
 
@@ -93,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const width = parseFloat(dimensionInputs[1].value);
       const height = parseFloat(dimensionInputs[2].value);
       const quantity = parseInt(quantityInput.value);
+      const price = parseFloat(priceInput.value);
 
       const dimensionUnit = dimensionUnitSelect.value;
       const lengthInMeters = convertToMeters(length, dimensionUnit);
