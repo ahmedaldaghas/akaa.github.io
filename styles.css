@@ -133,6 +133,21 @@ p {
   color: #009688;
 }
 
+#result {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1; /* Ensure it appears above other content */
+}
+
+
 /* Media queries for responsive layout */
 @media (max-width: 1024px) {
   .product-entry {
