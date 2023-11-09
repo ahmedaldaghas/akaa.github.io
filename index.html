@@ -3,29 +3,25 @@
 <head>
   <title>CBM Calculator</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
+  <meta charset="UTF-8">
 </head>
 <body>
   <div class="container">
     <h1>CBM Calculator</h1>
     <form id="calculator-form">
-      <label for="price">Price per CBM (BHD):</label>
-      <input type="number" id="price" step="0.01" required>
-      <br>
-
-      <label for="dimension">Dimension (LxWxH):</label>
-      <input type="number" id="length" step="0.01" class="dimension-input" required>
-      <input type="number" id="width" step="0.01" class="dimension-input" required>
-      <input type="number" id="height" step="0.01" class="dimension-input" required>
-      <select id="dimension-unit">
-        <option value="mm">mm</option>
-        <option value="cm">cm</option>
-        <option value="m">m</option>
-      </select>
-      <br>
-
+      <div id="price-entry">
+        <label for="price">Price per CBM (<span class="BHD">BHD</span>):</label>
+        <input type="number" id="price" step="0.01" required>
+      </div>
+      <div id="product-entries">
+        <!-- Product entries will be added here -->
+      </div>
+      <button type="button" id="add-product" class="add-product">Add Product</button>
       <div id="result">
+        <h2>Total CBM:</h2>
+        <p id="cbm-total"></p>
         <h2>Total Cost:</h2>
-        <p id="cost"></p>
+        <p id="cost-total"></p>
       </div>
     </form>
   </div>
