@@ -1,60 +1,111 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const inputFields = document.querySelectorAll(".dimension-input");
-  const dimensionUnitSelect = document.getElementById("dimension-unit");
-  const priceInput = document.getElementById("price"); // Add this line
   const resultDiv = document.getElementById("result");
-  const costText = document.getElementById("cost");
+  const cbmTotalText = document.getElementById("cbm-total");
+  const costTotalText = document.getElementById("cost-total");
+  const priceInput = document.getElementById("price");
+  const productEntries = document.getElementById("product-entries");
+  const addProductButton = document.getElementById("add-product");
 
-  // Load the selected dimension unit and price from cookies (if available)
-  const selectedUnit = getCookie("selectedUnit");
-  const savedPrice = getCookie("price"); // Add this line
-  if (selectedUnit) {
-    dimensionUnitSelect.value = selectedUnit;
-  }
-  if (savedPrice) {
-    priceInput.value = savedPrice; // Add this line
-  }
-
-  // Add an event listener to save the selected unit to cookies
-  dimensionUnitSelect.addEventListener("change", () => {
-    const selectedUnit = dimensionUnitSelect.value;
-    setCookie("selectedUnit", selectedUnit, 30); // Store for 30 days
-    calculateCost();
+  addProductButton.addEventListener("click", () => {
+    createProductEntry();
   });
 
-  // Add an event listener to save the price to cookies
   priceInput.addEventListener("input", () => {
-    const price = priceInput.value;
-    setCookie("price", price, 30); // Store for 30 days
     calculateCost();
   });
 
-  inputFields.forEach((input) => {
-    input.addEventListener("input", () => {
+  function createProductEntry() {
+    const productEntry = document.createElement("div");
+    productEntry.className = "product-entry";
+
+    const productNumber = productEntries.querySelectorAll(".product-entry").length + 1;
+
+    productEntry.innerHTML = `
+      <h3>Product ${productNumber}</h3>
+      <button type="button" class="remove-product">Remove Product</button>
+      <label for="dimension">Dimension (LxWxH):</label>
+      <input type="number" class="dimension-input" step="0.01" required onclick="this.select()">
+      <input type="number" class="dimension-input" step="0.01" required onclick="this.select()">
+      <input type="number" class="dimension-input" step="0.01" required onclick="this.select()">
+      <select class="dimension-unit">
+        <option value="mm">mm</option>
+        <option value="cm">cm</option>
+        <option value="m">m</option>
+      </select>
+      <br>
+
+      <label for="quantity">Quantity:</label>
+      <input type="number" class="quantity-input" value="1" required onclick="this.select()">
+      <br>
+
+      <p>Total CBM: <span class="cbm-product">0.00</span><span class="BHD"> m³</span></p>
+      <p>Total Cost: <span class="cost-product">0.00</span><span class="BHD"> BHD</span></p>
+    `;
+
+    productEntries.appendChild(productEntry);
+
+    // Get the unit from the previous product (if available)
+    const previousProductEntry = productEntry.previousElementSibling;
+    if (previousProductEntry) {
+      const previousUnit = previousProductEntry.querySelector(".dimension-unit").value;
+      productEntry.querySelector(".dimension-unit").value = previousUnit;
+    }
+
+    productEntry.querySelector(".remove-product").addEventListener("click", () => {
+      productEntries.removeChild(productEntry);
+      renumberProducts();
       calculateCost();
     });
+  }
+
+  productEntries.addEventListener("input", () => {
+    calculateCost();
   });
 
+  function renumberProducts() {
+    const productList = productEntries.querySelectorAll(".product-entry");
+    productList.forEach((product, index) => {
+      const productNumber = index + 1;
+      product.querySelector("h3").textContent = `Product ${productNumber}`;
+    });
+  }
+
   function calculateCost() {
-    const price = parseFloat(priceInput.value); // Update to use the priceInput
-    const length = parseFloat(document.getElementById("length").value);
-    const width = parseFloat(document.getElementById("width").value);
-    const height = parseFloat(document.getElementById("height").value);
+    const productList = productEntries.querySelectorAll(".product-entry");
+    let totalCBM = 0;
+    let totalCost = 0;
+    const price = parseFloat(priceInput.value);
 
-    const dimensionUnit = dimensionUnitSelect.value;
+    productList.forEach((productEntry) => {
+      const dimensionInputs = productEntry.querySelectorAll(".dimension-input");
+      const dimensionUnitSelect = productEntry.querySelector(".dimension-unit");
+      const quantityInput = productEntry.querySelector(".quantity-input");
+      const cbmProduct = productEntry.querySelector(".cbm-product");
+      const costProduct = productEntry.querySelector(".cost-product");
 
-    // Convert all dimensions to meters
-    const lengthInMeters = convertToMeters(length, dimensionUnit);
-    const widthInMeters = convertToMeters(width, dimensionUnit);
-    const heightInMeters = convertToMeters(height, dimensionUnit);
+      const length = parseFloat(dimensionInputs[0].value);
+      const width = parseFloat(dimensionInputs[1].value);
+      const height = parseFloat(dimensionInputs[2].value);
+      const quantity = parseInt(quantityInput.value);
 
-    // Calculate the volume in cubic meters
-    const volume = lengthInMeters * widthInMeters * heightInMeters;
+      const dimensionUnit = dimensionUnitSelect.value;
+      const lengthInMeters = convertToMeters(length, dimensionUnit);
+      const widthInMeters = convertToMeters(width, dimensionUnit);
+      const heightInMeters = convertToMeters(height, dimensionUnit);
+      const volume = lengthInMeters * widthInMeters * heightInMeters;
+      const cbm = volume * quantity;
+      const cost = price * volume * quantity;
 
-    // Calculate the cost
-    const cost = price * volume;
+      cbmProduct.textContent = `${cbm.toFixed(2)}`;
+      costProduct.textContent = `${cost.toFixed(3)}`;
 
-    costText.innerHTML = `${cost.toFixed(3)}<span class="dollar-sign"> BHD</span>`; // Wrap the cost in a span
+      totalCBM += cbm;
+      totalCost += cost;
+    });
+
+    cbmTotalText.innerHTML = `${totalCBM.toFixed(2)} <span class='BHD'>m³</span>`;
+    costTotalText.innerHTML = `${totalCost.toFixed(3)} <span class='BHD'>BHD</span>`;
+
     resultDiv.style.display = "block";
   }
 
@@ -69,24 +120,5 @@ document.addEventListener("DOMContentLoaded", function () {
       default:
         return value;
     }
-  }
-
-  // Function to set a cookie
-  function setCookie(name, value, days) {
-    const expires = new Date();
-    expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()}`;
-  }
-
-  // Function to get a cookie by name
-  function getCookie(name) {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(`${name}=`)) {
-        return cookie.substring(name.length + 1);
-      }
-    }
-    return null;
   }
 });
