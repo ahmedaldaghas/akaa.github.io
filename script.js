@@ -14,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
     calculateCost();
   });
 
+  document.addEventListener("keydown", function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      createProductEntry();
+    }
+  });
+
   function createProductEntry() {
     const productEntry = document.createElement("div");
     productEntry.className = "product-entry";
